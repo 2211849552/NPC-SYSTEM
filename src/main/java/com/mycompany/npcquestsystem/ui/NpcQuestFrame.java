@@ -1,10 +1,10 @@
 package com.mycompany.npcquestsystem.ui;
 
-import com.mycompany.npcquestsystem.dialogue.strategy.FriendlyDialogueStrategy;
-import com.mycompany.npcquestsystem.dialogue.strategy.HostileDialogueStrategy;
 import com.mycompany.npcquestsystem.dialogue.strategy.NeutralDialogueStrategy;
 import com.mycompany.npcquestsystem.domain.Npc;
 import com.mycompany.npcquestsystem.domain.Player;
+import com.mycompany.npcquestsystem.factory.NpcArchetype;
+import com.mycompany.npcquestsystem.factory.NpcFactory;
 import com.mycompany.npcquestsystem.quest.Quest;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -38,9 +38,10 @@ final class NpcQuestFrame extends JFrame {
     NpcQuestFrame() {
         super("NPC Dialogue & Quest — Strategy demo");
         this.hero = new Player("Amina", 5);
-        this.quartermaster = new Npc("npc_qm", "Quartermaster Hale", new NeutralDialogueStrategy());
-        this.scout = new Npc("npc_scout", "Scout Rin", new FriendlyDialogueStrategy());
-        this.deserter = new Npc("npc_deserter", "Deserter Voss", new HostileDialogueStrategy());
+        NpcFactory npcFactory = new NpcFactory();
+        this.quartermaster = npcFactory.createNpc(NpcArchetype.QUARTERMASTER);
+        this.scout = npcFactory.createNpc(NpcArchetype.SCOUT);
+        this.deserter = npcFactory.createNpc(NpcArchetype.DESERTER);
         this.recon = new Quest("q_recon", "Recon the ridge", "Survey enemy positions and return.");
         this.npcChoices = new Npc[] {quartermaster, scout, deserter};
 
@@ -77,7 +78,8 @@ final class NpcQuestFrame extends JFrame {
                 });
 
         JPanel dialoguePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        dialoguePanel.setBorder(BorderFactory.createTitledBorder("Dialogue (Strategy)"));
+        dialoguePanel.setBorder(
+                BorderFactory.createTitledBorder("Dialogue (Strategy) — NPCs from NpcFactory"));
         dialoguePanel.add(new JLabel("NPC:"));
         dialoguePanel.add(npcCombo);
         dialoguePanel.add(greetBtn);
@@ -116,7 +118,7 @@ final class NpcQuestFrame extends JFrame {
 
         refreshQuest();
         appendLine("Select an NPC, use Greet / Reply, or run the quest buttons.");
-        appendLine("\"Story: calm Deserter\" demonstrates setDialogueStrategy (Strategy).");
+        appendLine("NPCs are created with NpcFactory (Factory); dialogue tone is DialogueStrategy (Strategy).");
         pack();
     }
 
