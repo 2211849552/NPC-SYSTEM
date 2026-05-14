@@ -6,6 +6,7 @@ import com.mycompany.npcquestsystem.domain.Player;
 import com.mycompany.npcquestsystem.factory.NpcArchetype;
 import com.mycompany.npcquestsystem.factory.NpcFactory;
 import com.mycompany.npcquestsystem.quest.Quest;
+import com.mycompany.npcquestsystem.quest.observe.LoggingQuestObserver;
 
 /** Console demo (same logic as {@link com.mycompany.npcquestsystem.ui.NpcQuestSwingApplication}). */
 public final class NpcQuestApplication {
@@ -19,6 +20,8 @@ public final class NpcQuestApplication {
         Npc deserter = npcFactory.createNpc(NpcArchetype.DESERTER);
 
         Quest recon = new Quest("q_recon", "Recon the ridge", "Survey enemy positions and return.");
+        recon.addQuestObserver(
+                new LoggingQuestObserver(q -> System.out.println("[QuestObserver] " + q.getStatus() + ": " + q)));
 
         printSection("Greetings (NPCs built via Factory; each uses a different DialogueStrategy)");
         System.out.println(quartermaster.greet(hero));
@@ -36,7 +39,7 @@ public final class NpcQuestApplication {
         deserter.setDialogueStrategy(new NeutralDialogueStrategy());
         System.out.println("After setDialogueStrategy(Neutral): " + deserter.greet(hero));
 
-        printSection("Quest placeholder (for teammates' patterns)");
+        printSection("Quest + Observer (status changes notify QuestObservers)");
         System.out.println(recon);
         recon.accept();
         System.out.println("Accepted: " + recon);

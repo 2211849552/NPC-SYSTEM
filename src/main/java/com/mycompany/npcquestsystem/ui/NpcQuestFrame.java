@@ -6,6 +6,7 @@ import com.mycompany.npcquestsystem.domain.Player;
 import com.mycompany.npcquestsystem.factory.NpcArchetype;
 import com.mycompany.npcquestsystem.factory.NpcFactory;
 import com.mycompany.npcquestsystem.quest.Quest;
+import com.mycompany.npcquestsystem.quest.observe.LoggingQuestObserver;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -43,6 +44,12 @@ final class NpcQuestFrame extends JFrame {
         this.scout = npcFactory.createNpc(NpcArchetype.SCOUT);
         this.deserter = npcFactory.createNpc(NpcArchetype.DESERTER);
         this.recon = new Quest("q_recon", "Recon the ridge", "Survey enemy positions and return.");
+        this.recon.addQuestObserver(
+                new LoggingQuestObserver(
+                        q -> {
+                            refreshQuest();
+                            appendLine("[QuestObserver] " + q);
+                        }));
         this.npcChoices = new Npc[] {quartermaster, scout, deserter};
 
         npcCombo.addItem(quartermaster.getDisplayName());
@@ -89,22 +96,12 @@ final class NpcQuestFrame extends JFrame {
         dialoguePanel.add(swapBtn);
 
         JButton acceptQuestBtn = new JButton("Accept quest");
-        acceptQuestBtn.addActionListener(
-                e -> {
-                    recon.accept();
-                    refreshQuest();
-                    appendLine("[Quest] " + recon);
-                });
+        acceptQuestBtn.addActionListener(e -> recon.accept());
         JButton completeQuestBtn = new JButton("Complete quest");
-        completeQuestBtn.addActionListener(
-                e -> {
-                    recon.complete();
-                    refreshQuest();
-                    appendLine("[Quest] " + recon);
-                });
+        completeQuestBtn.addActionListener(e -> recon.complete());
 
         JPanel questPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        questPanel.setBorder(BorderFactory.createTitledBorder("Quest (placeholder for teammates)"));
+        questPanel.setBorder(BorderFactory.createTitledBorder("Quest — Observer (status pushes to QuestObservers)"));
         questPanel.add(questLabel);
         questPanel.add(acceptQuestBtn);
         questPanel.add(completeQuestBtn);
@@ -118,7 +115,7 @@ final class NpcQuestFrame extends JFrame {
 
         refreshQuest();
         appendLine("Select an NPC, use Greet / Reply, or run the quest buttons.");
-        appendLine("NPCs are created with NpcFactory (Factory); dialogue tone is DialogueStrategy (Strategy).");
+        appendLine("NPCs: NpcFactory (Factory); dialogue: DialogueStrategy (Strategy); quest updates: QuestObserver (Observer).");
         pack();
     }
 

@@ -1,13 +1,17 @@
 package com.mycompany.npcquestsystem.quest;
 
+import com.mycompany.npcquestsystem.quest.observe.QuestObserver;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-/** Minimal quest model for teammates to extend with other patterns. */
+/** Quest model; status changes notify {@link QuestObserver} subscribers (Observer). */
 public final class Quest {
 
     private final String id;
     private final String title;
     private final String description;
+    private final List<QuestObserver> observers = new ArrayList<>();
     private QuestStatus status;
 
     public Quest(String id, String title, String description) {
@@ -33,15 +37,31 @@ public final class Quest {
         return status;
     }
 
+    public void addQuestObserver(QuestObserver observer) {
+        observers.add(Objects.requireNonNull(observer, "observer"));
+    }
+
+    public void removeQuestObserver(QuestObserver observer) {
+        observers.remove(observer);
+    }
+
     public void accept() {
         if (status == QuestStatus.AVAILABLE) {
             status = QuestStatus.IN_PROGRESS;
+            notifyQuestObservers();
         }
     }
 
     public void complete() {
         if (status == QuestStatus.IN_PROGRESS) {
             status = QuestStatus.COMPLETED;
+            notifyQuestObservers();
+        }
+    }
+
+    private void notifyQuestObservers() {
+        for (QuestObserver observer : new ArrayList<>(observers)) {
+            observer.questUpdated(this);
         }
     }
 
